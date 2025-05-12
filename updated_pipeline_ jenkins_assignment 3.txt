@@ -1,0 +1,52 @@
+pipeline {
+    agent {
+        label "built-in"
+    }
+    stages {
+        stage('install and start httpd'){
+            steps {
+                  sh "sudo yum install httpd -y"
+                  sh "sudo service httpd start"
+            }
+        }
+        stage ("master_repo"){
+           agent{
+               label{
+                   label "built-in"
+                customWorkspace "/root/.jenkins/workspace/webhook_pipeline/master_repo"
+            }
+           } 
+            steps {
+                git branch: "master", url: "https://github.com/Bhagyashri1796/master_repo.git"
+                sh "sudo cp -r /root/.jenkins/workspace/webhook_pipeline/master_repo/index.html /var/www/html/"
+                sh "sudo chmod 777 /var/www/html/index.html"
+            }
+        }  
+        stage ("dev_repo"){
+            agent{
+                label{
+                       label "built-in"
+                customWorkspace "/root/.jenkins/workspace/webhook_pipeline/dev_repo"
+                }
+            }
+             steps {
+                git branch: "Dev", url: "https://github.com/Bhagyashri1796/dev_repo.git"
+                sh "sudo cp -r /root/.jenkins/workspace/webhook_pipeline/dev_repo/index.html /var/www/html/"
+                sh "sudo chmod 777 /var/www/html/index.html"
+            }
+        } 
+		stage ("qa_repo"){
+		    agent{
+		        label{
+		               label "built-in"
+                customWorkspace "/root/.jenkins/workspace/webhook_pipeline/qa_repo"
+                }
+		    }
+            steps {
+                git branch: "QA", url: "https://github.com/Bhagyashri1796/QA_repo.git"
+                sh "sudo cp -r /root/.jenkins/workspace/webhook_pipeline/qa_repo/index.html /var/www/html/"
+                sh "sudo chmod 777 /var/www/html/index.html"
+            }
+        }
+    }
+}
